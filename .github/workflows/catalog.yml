@@ -1,0 +1,24 @@
+name: P0ïPo catalogus
+on:
+  schedule:
+    - cron: '17 */6 * * *'   # elke 6 uur (op :17 om de drukte op het hele uur te ontwijken)
+  workflow_dispatch: {}       # handmatig starten kan ook
+permissions:
+  contents: write
+concurrency: catalog
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: node engine/build-catalog.mjs
+      - name: Catalogus committen als er iets veranderd is
+        run: |
+          git config user.name "P0ïPo motor"
+          git config user.email "actions@users.noreply.github.com"
+          git add catalog/
+          git diff --cached --quiet || git commit -m "Catalogus bijgewerkt $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push
