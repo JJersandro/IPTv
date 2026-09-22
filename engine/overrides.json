@@ -1,0 +1,1 @@
+{"_uitleg": "Jouw handmatige correcties winnen altijd. Sleutel = kanaal-id uit catalog/channels.json. Voorbeeld: {\"ch_abc123\": {\"add\": [\"anime\"], \"remove\": [\"kids\"]}}"}

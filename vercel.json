@@ -1,0 +1,7 @@
+{
+  "headers": [
+    { "source": "/catalog/(.*)", "headers": [{ "key": "cache-control", "value": "public, max-age=300, s-maxage=600" }] },
+    { "source": "/engine/(.*)", "headers": [{ "key": "x-robots-tag", "value": "noindex" }] }
+  ],
+  "ignoreCommand": "git diff --quiet ${VERCEL_GIT_PREVIOUS_SHA:-HEAD^} HEAD -- . ':(exclude)catalog'"
+}

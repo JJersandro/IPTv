@@ -1,0 +1,730 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>P0ïPo TV</title>
+<meta name="theme-color" content="#081b24">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.13/hls.min.js"></script>
+<style>
+:root{
+  --abyss:#081b24; --lagoon:#0b2733; --reef:#123a4a; --reef-hi:#1a4d60;
+  --flamboyant:#ff5d3a; --sun:#ffd23f; --foam:#eaf6f4; --mist:#8fb3b3;
+  --font:"Bricolage Grotesque", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit}
+html,body{margin:0;min-height:100%}
+body{
+  font-family:var(--font); color:var(--foam); font-variant-numeric:tabular-nums;
+  background:
+    radial-gradient(120% 60% at 85% 110%, rgba(255,93,58,.18), transparent 60%),
+    linear-gradient(180deg, var(--abyss), var(--lagoon) 70%);
+  background-attachment:fixed;
+}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
+
+/* top bar */
+.bar{display:flex;align-items:center;gap:1.25rem;padding:1rem clamp(1rem,4vw,3rem);position:sticky;top:0;z-index:5;
+  background:linear-gradient(180deg,var(--abyss) 60%,transparent)}
+.brand{font-weight:800;font-size:1.15rem;letter-spacing:-.02em;white-space:nowrap}
+.brand i{font-style:normal;color:var(--flamboyant)}
+nav{display:flex;gap:.25rem}
+nav button{background:none;border:0;padding:.5rem .9rem;border-radius:999px;cursor:pointer;color:var(--mist);font-weight:600}
+nav button[aria-current="page"]{background:var(--reef);color:var(--foam)}
+.search{margin-left:auto;flex:0 1 20rem}
+.search input{width:100%;background:var(--reef);border:1px solid transparent;border-radius:999px;padding:.55rem 1rem}
+.search input::placeholder{color:var(--mist)}
+.clock{font-weight:600;color:var(--mist);min-width:3.5rem;text-align:right}
+
+main{padding:0 clamp(1rem,4vw,3rem) 4rem}
+.view[hidden]{display:none}
+
+/* hearth */
+.greet{margin:1.5rem 0 2rem;font-weight:800;letter-spacing:-.045em;line-height:.9;font-size:clamp(3.5rem,11vw,9rem)}
+.greet small{display:block;font-size:clamp(1rem,1.6vw,1.25rem);letter-spacing:0;font-weight:400;color:var(--mist);margin-top:1rem;line-height:1.4}
+.heroes{display:grid;grid-template-columns:2fr 1fr;gap:1rem;margin-bottom:2.5rem}
+.hero{position:relative;overflow:hidden;border:0;border-radius:28px;padding:1.75rem;min-height:12rem;text-align:left;cursor:pointer;display:flex;flex-direction:column;justify-content:flex-end}
+.hero h2{margin:0;font-size:clamp(2rem,4vw,3.25rem);letter-spacing:-.03em;line-height:1}
+.hero p{margin:.4rem 0 0;max-width:40ch}
+.hero.pais{background:linear-gradient(135deg,#0d5c8f 0%,#0b7a9a 55%,var(--sun) 160%);color:#fff}
+.hero.pais::after{content:"";position:absolute;right:-3rem;top:-3rem;width:14rem;height:14rem;border-radius:50%;
+  background:radial-gradient(circle,var(--sun) 0 30%,transparent 31%)}
+.hero.resume{background:var(--reef);color:var(--foam)}
+.hero.resume p{color:var(--mist)}
+.row{margin-bottom:2.25rem}
+.row h3{font-size:1.25rem;margin:0 0 .8rem;font-weight:600}
+.row .empty{color:var(--mist);margin:0}
+.strip{display:flex;gap:.75rem;overflow-x:auto;padding:.4rem .2rem 1rem;scroll-snap-type:x proximity}
+.strip .card{flex:0 0 15rem;scroll-snap-align:start}
+.worlds{display:grid;grid-template-columns:repeat(auto-fill,minmax(11rem,1fr));gap:.75rem}
+.world{background:var(--reef);border:0;border-radius:18px;padding:1rem;text-align:left;cursor:pointer}
+.world span{font-size:1.8rem;display:block}
+.world b{display:block;margin-top:.3rem}
+.world small{color:var(--mist)}
+
+/* live */
+.chips{display:flex;gap:.4rem;flex-wrap:wrap;margin:1rem 0}
+.chip{background:var(--reef);border:0;border-radius:999px;padding:.45rem .9rem;cursor:pointer;color:var(--mist)}
+.chip[aria-pressed="true"]{background:var(--foam);color:var(--abyss);font-weight:600}
+.chips.groups{flex-wrap:nowrap;overflow-x:auto;padding-bottom:.4rem}
+.chips.groups .chip{font-size:.9rem;padding:.35rem .75rem;flex:0 0 auto}
+.status{color:var(--mist);margin:.5rem 0 1rem;display:flex;gap:1rem;flex-wrap:wrap;align-items:center}
+.status label{display:flex;gap:.4rem;align-items:center;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(14rem,1fr));gap:.75rem}
+.card{position:relative;display:flex;gap:.8rem;align-items:center;background:rgba(18,58,74,.7);border:0;border-radius:16px;padding:.7rem;text-align:left;cursor:pointer;min-width:0}
+.card:hover,.card:focus-visible{background:var(--reef-hi)}
+.card.dead{opacity:.4}
+.logo{position:relative;flex:0 0 3.5rem;height:3.5rem;border-radius:12px;background:rgba(234,246,244,.08);display:grid;place-items:center;overflow:hidden;font-weight:800;color:var(--mist)}
+.logo img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:.35rem;background:var(--reef)}
+.meta{min-width:0}
+.meta b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.meta small{display:block;color:var(--mist);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.star{position:absolute;top:.4rem;right:.6rem;color:var(--sun);font-style:normal}
+.add{display:flex;gap:.5rem;margin-top:3rem;max-width:40rem}
+.add input{flex:1;background:var(--reef);border:0;border-radius:12px;padding:.6rem .9rem}
+.btn{background:var(--flamboyant);border:0;border-radius:12px;padding:.6rem 1rem;font-weight:600;cursor:pointer;color:#fff}
+.note{color:var(--mist);max-width:60ch}
+
+/* player */
+.player{position:fixed;inset:0;background:#000;z-index:20;display:none}
+.player.open{display:block}
+.player video{width:100%;height:100%;object-fit:contain;background:#000}
+.hud{position:absolute;left:0;right:0;bottom:0;padding:2rem clamp(1rem,4vw,3rem) calc(1.5rem + env(safe-area-inset-bottom,0px));
+  background:linear-gradient(0deg,rgba(8,27,36,.95),transparent);transition:opacity .35s}
+.player.idle .hud,.player.idle .close{opacity:0;cursor:none}
+.hud h2{margin:0;font-size:clamp(1.6rem,3vw,2.5rem);letter-spacing:-.02em}
+.hud .sub{color:var(--mist);margin:.2rem 0 1rem}
+.live{display:inline-block;background:var(--flamboyant);color:#fff;border-radius:6px;padding:.1rem .5rem;font-size:.8rem;font-weight:800;margin-left:.6rem;vertical-align:middle}
+.controls{display:flex;gap:.5rem;flex-wrap:wrap}
+.controls button{background:rgba(234,246,244,.12);border:0;border-radius:12px;padding:.55rem 1rem;cursor:pointer;min-height:2.75rem}
+.controls button.on{color:var(--sun)}
+.msg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;max-width:32rem;padding:1rem;color:var(--foam)}
+.msg[hidden]{display:none}
+.close{position:absolute;top:calc(1rem + env(safe-area-inset-top,0px));right:1rem;background:rgba(8,27,36,.7);border:0;border-radius:999px;width:2.75rem;height:2.75rem;font-size:1.3rem;cursor:pointer;transition:opacity .35s}
+
+@media (max-width:720px){
+  .bar{flex-wrap:wrap}.search{order:3;flex:1 1 100%}
+  .heroes{grid-template-columns:1fr}
+  .hero{min-height:9rem}
+  .greet{margin:.5rem 0 1.25rem}
+  .controls button{flex:1 1 auto}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="brand">P0<i>ï</i>Po TV</div>
+  <nav>
+    <button class="nav-target" data-view="hearth" aria-current="page">Hearth</button>
+    <button class="nav-target" data-view="live">Live</button>
+  </nav>
+  <div class="search"><input id="q" class="nav-target" type="search" placeholder="Zoek een kanaal" aria-label="Zoek een kanaal"></div>
+  <div class="clock" id="clock"></div>
+</header>
+
+<main>
+  <section class="view" id="hearth">
+    <h1 class="greet" id="greet"></h1>
+    <div class="heroes">
+      <button class="hero pais nav-target" id="goPais"><h2>Mi Pais</h2><p>Aruba, Curaçao, Bonaire en alles in het Papiaments.</p></button>
+      <button class="hero resume nav-target" id="resume"><h2>Verder kijken</h2><p id="resumeTxt">Nog niets gekeken.</p></button>
+    </div>
+    <div class="row"><h3>Favorieten</h3><div id="favRow"></div></div>
+    <div class="row"><h3>Recent gekeken</h3><div id="recentRow"></div></div>
+    <div class="row"><h3>Werelden</h3><div class="worlds" id="worlds"></div></div>
+    <div class="row"><h3>Landen &amp; talen</h3><div class="chips" id="landLang"></div></div>
+  </section>
+
+  <section class="view" id="live" hidden>
+    <div class="chips" id="modeToggle"></div>
+    <div class="chips" id="srcChips"></div>
+    <div class="chips groups" id="groupChips"></div>
+    <div class="status">
+      <span id="count"></span>
+      <label><input type="checkbox" id="hideDead" checked> Verberg streams die faalden</label>
+    </div>
+    <div class="grid" id="grid"></div>
+    <button class="btn nav-target" id="more" hidden style="margin-top:1rem">Meer kanalen tonen</button>
+    <form class="add" id="addForm">
+      <input id="addUrl" type="url" placeholder="Eigen M3U-link toevoegen" aria-label="Eigen M3U-link" required>
+      <button class="btn" type="submit">Toevoegen</button>
+    </form>
+    <p class="note">Laptop: pijltjes navigeren, Enter kijkt, S of rechtsklik zet een kanaal in je favorieten. Speler: ← → zapt, F is fullscreen, Esc sluit. Telefoon: tik om te kijken, lang drukken voor favoriet (Android), in de speler veeg je links of rechts om te zappen.</p>
+  </section>
+</main>
+
+<div class="player" id="player" role="dialog" aria-label="Speler">
+  <video id="video" playsinline autoplay></video>
+  <div class="msg" id="msg" hidden></div>
+  <button class="close" id="closeBtn" aria-label="Sluiten">✕</button>
+  <div class="hud">
+    <h2 id="pName"></h2>
+    <p class="sub" id="pSub"></p>
+    <div class="controls">
+      <button id="prevBtn">◀ Vorige</button>
+      <button id="pauseBtn">Pauze</button>
+      <button id="nextBtn">Volgende ▶</button>
+      <button id="favBtn">★ Favoriet</button>
+      <button id="fsBtn">Fullscreen</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { REPO, rawUrl } from './repo-config.mjs';
+
+const BASE = 'https://iptv-org.github.io/iptv/';
+const CATALOG_CACHE_NAME = 'p0ipo-catalog';
+const QUICKLINKS = [
+  {id:'aw', label:'Aruba', flag:'🇦🇼', type:'country'},
+  {id:'cw', label:'Curaçao', flag:'🇨🇼', type:'country'},
+  {id:'bq', label:'Bonaire', flag:'🇧🇶', type:'country'},
+  {id:'nl', label:'Nederland', flag:'🇳🇱', type:'country'},
+  {id:'uk', label:'United Kingdom', flag:'🇬🇧', type:'country'},
+  {id:'us', label:'United States', flag:'🇺🇸', type:'country'},
+  {id:'cv', label:'Cabo Verde', flag:'🇨🇻', type:'country'},
+  {id:'jp', label:'Japan', flag:'🇯🇵', type:'country'},
+  {id:'pap', label:'Papiamentstalig', flag:'🗣️', type:'lang'},
+  {id:'nld', label:'Nederlandstalig', flag:'🗣️', type:'lang'},
+  {id:'eng', label:'Engelstalig', flag:'🗣️', type:'lang'},
+  {id:'spa', label:'Spaanstalig', flag:'🗣️', type:'lang'},
+  {id:'jpn', label:'Japanstalig', flag:'🗣️', type:'lang'},
+  {id:'kor', label:'Koreaanstalig', flag:'🗣️', type:'lang'},
+];
+
+const $ = s => document.querySelector(s);
+const LS = {
+  get(k,d){ try{ const v = JSON.parse(localStorage.getItem(k)); return v ?? d; }catch{ return d; } },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} }
+};
+let favs = LS.get('p0ipo.favs', []);
+let recent = LS.get('p0ipo.recent', []);
+let dead = new Set(LS.get('p0ipo.dead', []));
+let customs = LS.get('p0ipo.customs', []);
+
+const cache = {}; // alleen voor custom M3U-bronnen (catalogus loopt via loadCatalog())
+const IN_FRAME = (() => { try { return window.self !== window.top; } catch { return true; } })();
+const lists = {};
+
+let catalog = null, catalogState = 'loading', catalogDegraded = false;
+let viewMode = 'catalog', activeCat = null, activeQuick = null, activeCustomId = null, activeGroup = null;
+
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clean = n => n.replace(/\s*\(\d{3,4}[pi]\)/i,'').replace(/\s*\[[^\]]*\]/g,'').trim();
+const initials = n => clean(n).split(/\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
+const isFav = url => favs.some(f => f.url === url);
+
+function parseM3U(txt){
+  const out = []; let cur = null;
+  for (const raw of txt.split(/\r?\n/)){
+    const l = raw.trim(); if (!l) continue;
+    if (l.startsWith('#EXTINF')){
+      const a = {}; l.replace(/([\w-]+)="([^"]*)"/g, (_,k,v) => { a[k] = v; });
+      const cut = l.indexOf(',', Math.max(0, l.lastIndexOf('"')));
+      const name = cut >= 0 ? l.slice(cut+1).trim() : '';
+      const groups = (a['group-title'] || '').split(';').map(s => s.trim().toLowerCase()).filter(Boolean);
+      cur = {name: name || a['tvg-name'] || 'Onbekend', logo: a['tvg-logo'] || '', group: (a['group-title'] || '').split(';')[0], groups};
+    } else if (!l.startsWith('#') && cur){
+      cur.url = l; out.push(cur); cur = null;
+    }
+  }
+  return out;
+}
+
+/* ---------- Catalogus: laden, cachen, normaliseren, fallback ---------- */
+function fetchWithTimeout(url, ms = 20000){
+  const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), ms);
+  return fetch(url, { signal: ctl.signal }).finally(() => clearTimeout(t));
+}
+
+function normalizeCatalog(raw){
+  const categories = raw.categories || [];
+  const catLabel = {}, catEmoji = {};
+  categories.forEach(c => { catLabel[c.id] = c.label; catEmoji[c.id] = c.emoji; });
+  const channels = (raw.channels || []).map(c => {
+    const cats = c.p || [];
+    const bits = [
+      cats.map(id => catLabel[id] ? `${catEmoji[id] || ''} ${catLabel[id]}`.trim() : id).join(', '),
+      c.q, c.geo ? 'geo-blocked' : null,
+    ].filter(Boolean).join(', ');
+    return {
+      id: c.i, name: c.n, url: c.u, cats,
+      logo: c.l || '', quality: c.q || '',
+      countries: c.c || [], langs: c.g || [],
+      geoBlocked: !!c.geo, notAlwaysOn: !!c.x, serverDead: !!c.dead,
+      firstSeen: c.f || '', bits,
+    };
+  });
+  return { generated: raw.generated, categories, channels };
+}
+
+async function cacheCatalog(json){
+  try {
+    if (!('caches' in window)) return;
+    const c = await caches.open(CATALOG_CACHE_NAME);
+    await c.put('channels.json', new Response(JSON.stringify(json), { headers: { 'content-type': 'application/json' } }));
+  } catch {}
+}
+
+async function buildFallbackCatalog(){
+  // Allerlaatste redmiddel: alleen Mi Pais-lijsten, client-side ingedeeld via de
+  // gedeelde engine/categorize.mjs (geen index*.m3u — te groot voor de browser).
+  const [{ categorizeChannel }, taxRes] = await Promise.all([
+    import('./engine/categorize.mjs'),
+    fetchWithTimeout('engine/taxonomy.json'),
+  ]);
+  const taxonomy = (await taxRes.json()).categories;
+  const sources = [
+    { url: BASE + 'countries/aw.m3u', country: 'aw' },
+    { url: BASE + 'countries/cw.m3u', country: 'cw' },
+    { url: BASE + 'countries/bq.m3u', country: 'bq' },
+    { url: BASE + 'languages/pap.m3u', lang: 'pap' },
+  ];
+  const seen = new Set(), channels = [];
+  for (const src of sources){
+    let txt;
+    try { txt = await (await fetchWithTimeout(src.url)).text(); } catch { continue; }
+    for (const c of parseM3U(txt)){
+      if (!c.url || seen.has(c.url)) continue; seen.add(c.url);
+      const ch = { name: clean(c.name), url: c.url, logo: c.logo, cats: c.groups || [],
+        countries: src.country ? [src.country] : [], langs: src.lang ? [src.lang] : [] };
+      ch.cats = categorizeChannel(ch, taxonomy, null);
+      channels.push(ch);
+    }
+  }
+  return {
+    generated: new Date().toISOString(),
+    categories: taxonomy.map(({id,label,emoji}) => ({id,label,emoji})),
+    channels: channels.map((c,i) => ({ i: 'fb_' + i, n: c.name, u: c.url, p: c.cats, l: c.logo, c: c.countries, g: c.langs })),
+  };
+}
+
+function applyCatalog(raw, fromCache = false, fromFallback = false){
+  catalog = normalizeCatalog(raw);
+  catalogState = catalog.channels.length ? 'ready' : 'empty';
+  catalogDegraded = fromCache || fromFallback;
+  renderAll();
+}
+
+async function loadCatalog(){
+  catalogState = 'loading'; catalogDegraded = false; renderAll();
+  let networkErr = null;
+
+  // laag 1: raw.githubusercontent.com (main branch — altijd de laatst gecommitte stand,
+  // ook als deze deployment zelf nog geen eigen /catalog/-run heeft, bijv. een preview-build)
+  try {
+    const r = await fetchWithTimeout(rawUrl('catalog/channels.json'));
+    if (r.ok) { const j = await r.json(); cacheCatalog(j); applyCatalog(j); return; }
+  } catch { networkErr = 'error-network'; }
+
+  // laag 2: same-origin (wat Vercel zelf serveert)
+  try {
+    const r = await fetchWithTimeout('catalog/channels.json');
+    if (r.ok) { const j = await r.json(); cacheCatalog(j); applyCatalog(j); return; }
+    if (r.status === 404) networkErr = 'error-404';
+  } catch { networkErr = networkErr || 'error-network'; }
+
+  // laag 3: laatst gecachete catalogus (Cache API)
+  try {
+    const c = await caches.open(CATALOG_CACHE_NAME);
+    const cached = await c.match('channels.json');
+    if (cached) { const j = await cached.json(); applyCatalog(j, true); return; }
+  } catch {}
+
+  // laag 4: alleen Mi Pais-lijsten + client-side categorize.mjs
+  try {
+    const j = await buildFallbackCatalog();
+    if (j.channels.length) { applyCatalog(j, false, true); return; }
+  } catch {}
+
+  catalog = null;
+  catalogState = networkErr || 'error-network';
+  renderAll();
+}
+
+function effectiveIsDead(ch){ return dead.has(ch.url) || !!ch.serverDead; }
+
+/* ---------- Custom M3U laden (ongewijzigd) ---------- */
+async function load(src){
+  if (cache[src.id]) return cache[src.id];
+  const get = async u => {
+    const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 45000);
+    try {
+      const r = await fetch(u, {signal: ctl.signal});
+      if (!r.ok) throw new Error(`de server antwoordde met ${r.status}`);
+      return await r.text();
+    } catch (e) {
+      if (e.name === 'AbortError') throw new Error('downloaden duurde langer dan 45 seconden (trage of wegvallende verbinding)');
+      if (e instanceof TypeError) throw new Error(IN_FRAME
+        ? 'dit voorbeeldvenster blokkeert externe links. Download het bestand en open het los in je browser'
+        : 'de browser kreeg geen verbinding (offline, adblocker of netwerkfilter)');
+      throw e;
+    } finally { clearTimeout(t); }
+  };
+  const txt = await get(src.url);
+  const list = parseM3U(txt);
+  list.sort((a,b) => clean(a.name).localeCompare(clean(b.name)));
+  return cache[src.id] = list;
+}
+
+function card(c, key, i){
+  const isDead = effectiveIsDead(c);
+  let bits;
+  if (c.bits !== undefined) {
+    bits = c.bits;
+  } else {
+    const q = (c.name.match(/\((\d{3,4}[pi])\)/i) || [])[1];
+    const geo = /geo-blocked/i.test(c.name);
+    bits = [c.group || 'Live', q, geo ? 'geo-blocked' : null].filter(Boolean).join(', ');
+  }
+  return `<button class="card nav-target${isDead ? ' dead' : ''}" data-k="${key}" data-i="${i}">
+    <span class="logo"><span>${esc(initials(c.name))}</span>${c.logo ? `<img loading="lazy" src="${esc(c.logo)}" alt="" onerror="this.remove()">` : ''}</span>
+    <span class="meta"><b>${esc(clean(c.name))}</b><small>${esc(bits)}</small></span>
+    ${isFav(c.url) ? '<i class="star" aria-label="favoriet">★</i>' : ''}
+  </button>`;
+}
+function strip(key, arr, emptyTxt){
+  lists[key] = arr;
+  return arr.length ? `<div class="strip">${arr.map((c,i) => card(c,key,i)).join('')}</div>` : `<p class="empty">${emptyTxt}</p>`;
+}
+
+/* ---------- Hearth ---------- */
+function greeting(){
+  const h = new Date().getHours();
+  if (h < 6) return ['Nachtbraker.', 'Stil op straat, niet op je scherm.'];
+  if (h < 12) return ['Bon dia.', 'Koffie erbij, wereld erop.'];
+  if (h < 18) return ['Bon tardi.', 'Even de middag weg kijken.'];
+  return ['Bon nochi.', 'De bank roept. Wij ook.'];
+}
+function customTileHTML(){
+  return `<button class="world nav-target" data-custom="1"><span>📻</span><b>Mijn lijsten</b><small>${customs.length ? customs.length + ' toegevoegd' : 'Eigen M3U toevoegen'}</small></button>`;
+}
+function catalogPlainStatusText(){
+  if (catalogState === 'error-404') return 'Catalogus nog niet gegenereerd (verschijnt automatisch, elke 6u). Zie Live om opnieuw te proberen.';
+  if (catalogState === 'error-network') return 'Kon de catalogus niet laden. Zie Live om opnieuw te proberen.';
+  return '';
+}
+function renderWorldsHTML(){
+  if (catalogState === 'loading') return `<p class="empty">Categorieën laden…</p>${customTileHTML()}`;
+  if (catalogState !== 'ready' && catalogState !== 'empty') return `<p class="empty">${esc(catalogPlainStatusText())}</p>${customTileHTML()}`;
+  const tiles = catalog.categories.map(c => {
+    const n = catalog.channels.filter(ch => ch.cats.includes(c.id)).length;
+    return `<button class="world nav-target" data-cat="${c.id}"><span>${esc(c.emoji)}</span><b>${esc(c.label)}</b><small>${n} kanalen</small></button>`;
+  }).join('');
+  return tiles + customTileHTML();
+}
+function renderCountryRowHTML(){
+  return QUICKLINKS.map(q => `<button class="chip nav-target" data-quick="${q.type}:${q.id}">${q.flag} ${esc(q.label)}</button>`).join('');
+}
+function renderHearth(){
+  const [g, s] = greeting();
+  $('#greet').innerHTML = `${esc(g)}<small>${esc(s)}</small>`;
+  $('#favRow').innerHTML = strip('favs', favs, 'Druk S op een kanaal of ★ in de speler. Dan woont het hier.');
+  $('#recentRow').innerHTML = strip('recent', recent, 'Wat je kijkt, verschijnt hier vanzelf.');
+  $('#resumeTxt').textContent = recent[0] ? clean(recent[0].name) : 'Nog niets gekeken.';
+  $('#worlds').innerHTML = renderWorldsHTML();
+  $('#landLang').innerHTML = renderCountryRowHTML();
+}
+
+/* ---------- Live ---------- */
+function quickLabel(q){ const item = QUICKLINKS.find(x => x.id === q.id && x.type === q.type); return item ? `${item.flag} ${item.label}` : q.id; }
+function catalogFilterPredicate(ch){
+  return (!activeCat || ch.cats.includes(activeCat)) &&
+    (!activeQuick || (activeQuick.type === 'country' ? ch.countries.includes(activeQuick.id) : ch.langs.includes(activeQuick.id)));
+}
+function catalogStatusMessageHTML(){
+  if (catalogState === 'loading') return 'Catalogus laden…';
+  if (catalogState === 'error-404') return `De catalogus is nog niet gegenereerd. Dit gebeurt automatisch elke 6 uur — of <button class="chip nav-target" id="retryCatalog">probeer opnieuw</button>.`;
+  if (catalogState === 'error-network') return `Kon de catalogus niet laden (netwerk). <button class="chip nav-target" id="retryCatalog">Opnieuw proberen</button>`;
+  if (catalogState === 'empty') return 'Geen kanalen gevonden in de catalogus.';
+  return '';
+}
+
+async function renderLive(){
+  $('#modeToggle').innerHTML = `
+    <button class="chip nav-target" data-mode="catalog" aria-pressed="${viewMode === 'catalog'}">📡 Catalogus</button>
+    <button class="chip nav-target" data-mode="custom" aria-pressed="${viewMode === 'custom'}">📻 Mijn lijsten</button>`;
+  if (viewMode === 'custom') return renderCustomLive();
+  return renderCatalogLive();
+}
+
+function renderCatalogLive(){
+  if (catalogState !== 'ready' && catalogState !== 'empty'){
+    $('#srcChips').innerHTML = ''; $('#groupChips').innerHTML = ''; $('#grid').innerHTML = '';
+    $('#count').innerHTML = catalogStatusMessageHTML();
+    $('#more').hidden = true;
+    return;
+  }
+  $('#srcChips').innerHTML = catalog.categories.map(c =>
+    `<button class="chip nav-target" data-cat="${c.id}" aria-pressed="${c.id === activeCat}">${esc(c.emoji)} ${esc(c.label)}</button>`
+  ).join('') + (activeCat ? `<button class="chip nav-target" data-cat="">✕ Wis categorie</button>` : '');
+  $('#groupChips').innerHTML = activeQuick
+    ? `<span class="chip" aria-pressed="true">${esc(quickLabel(activeQuick))} <button class="nav-target" data-clear-quick="1" aria-label="Wis filter">✕</button></span>`
+    : '';
+  const base = catalog.channels.filter(catalogFilterPredicate);
+  const q = $('#q').value.trim().toLowerCase();
+  const hide = $('#hideDead').checked;
+  let shown = base.filter(ch => (!q || ch.name.toLowerCase().includes(q)) && !(hide && dead.has(ch.url)));
+  shown = shown.slice().sort((a,b) => {
+    const da = effectiveIsDead(a), db = effectiveIsDead(b);
+    if (da !== db) return da ? 1 : -1;
+    return a.name.localeCompare(b.name);
+  });
+  lists.grid = shown;
+  const hiddenCount = hide ? base.filter(ch => dead.has(ch.url)).length : 0;
+  $('#count').textContent = `${shown.length} kanalen${hiddenCount ? `, ${hiddenCount} verborgen` : ''}${catalogDegraded ? ' (verouderde/beperkte catalogus)' : ''}`;
+  $('#grid').innerHTML = ''; shownN = 0;
+  if (shown.length) appendPage(); else { $('#grid').innerHTML = '<p class="empty">Niets gevonden. Probeer een andere zoekterm, categorie of filter.</p>'; $('#more').hidden = true; }
+}
+
+async function renderCustomLive(){
+  if (!customs.length){
+    $('#srcChips').innerHTML = ''; $('#groupChips').innerHTML = ''; $('#grid').innerHTML = '';
+    $('#count').textContent = 'Nog geen eigen lijsten toegevoegd. Voeg hieronder een M3U-link toe.';
+    $('#more').hidden = true;
+    return;
+  }
+  if (!activeCustomId || !customs.some(c => c.id === activeCustomId)) activeCustomId = customs[0].id;
+  $('#srcChips').innerHTML = customs.map(s =>
+    `<button class="chip nav-target" data-custom-src="${s.id}" aria-pressed="${s.id === activeCustomId}">📻 ${esc(s.label)}</button>`
+  ).join('');
+  const src = customs.find(s => s.id === activeCustomId);
+  $('#grid').innerHTML = ''; $('#groupChips').innerHTML = '';
+  $('#count').textContent = 'Laden…';
+  let list;
+  try { list = await load(src); }
+  catch (e){
+    if (viewMode !== 'custom' || activeCustomId !== src.id) return;
+    $('#count').innerHTML = `Kon ${esc(src.label)} niet laden: ${esc(e.message)}. <button class="chip nav-target" id="retry">Opnieuw proberen</button>`;
+    $('#retry').onclick = renderLive;
+    return;
+  }
+  if (viewMode !== 'custom' || activeCustomId !== src.id) return;
+  const groups = [...new Set(list.map(c => c.group).filter(Boolean))].sort();
+  $('#groupChips').innerHTML = groups.length > 1
+    ? [`<button class="chip nav-target" data-group="" aria-pressed="${!activeGroup}">Alles</button>`, ...groups.map(g => `<button class="chip nav-target" data-group="${esc(g)}" aria-pressed="${g === activeGroup}">${esc(g)}</button>`)].join('')
+    : '';
+  const q = $('#q').value.trim().toLowerCase();
+  const hide = $('#hideDead').checked;
+  const shown = list.filter(c => (!activeGroup || c.group === activeGroup) && (!q || c.name.toLowerCase().includes(q)) && !(hide && dead.has(c.url)));
+  lists.grid = shown;
+  const hidden = hide ? list.filter(c => dead.has(c.url)).length : 0;
+  $('#count').textContent = `${shown.length} kanalen${hidden ? `, ${hidden} verborgen` : ''}`;
+  $('#grid').innerHTML = ''; shownN = 0;
+  if (shown.length) appendPage(); else { $('#grid').innerHTML = '<p class="empty">Niets gevonden. Probeer een andere zoekterm of wereld.</p>'; $('#more').hidden = true; }
+}
+
+const PAGE = 240; let shownN = 0;
+function appendPage(){
+  const next = lists.grid.slice(shownN, shownN + PAGE);
+  $('#grid').insertAdjacentHTML('beforeend', next.map((c,j) => card(c,'grid',shownN + j)).join(''));
+  shownN += next.length;
+  $('#more').hidden = shownN >= lists.grid.length;
+}
+function favFromCard(el){
+  const c = lists[el.dataset.k][+el.dataset.i]; toggleFav(c);
+  if (!$('#hearth').hidden){ const k = el.dataset.k, i = el.dataset.i; renderHearth(); document.querySelector(`.card[data-k="${k}"][data-i="${i}"]`)?.focus(); return; }
+  const st = el.querySelector('.star');
+  if (isFav(c.url)){ if (!st) el.insertAdjacentHTML('beforeend','<i class="star" aria-label="favoriet">★</i>'); } else st?.remove();
+}
+
+function show(view){
+  document.querySelectorAll('.view').forEach(v => v.hidden = v.id !== view);
+  document.querySelectorAll('nav button').forEach(b => b.dataset.view === view ? b.setAttribute('aria-current','page') : b.removeAttribute('aria-current'));
+  view === 'hearth' ? renderHearth() : renderLive();
+}
+function renderAll(){ $('#hearth').hidden ? renderLive() : renderHearth(); }
+function openCat(id){ activeCat = id || null; activeQuick = null; viewMode = 'catalog'; show('live'); }
+function openQuick(type, id){ activeQuick = {type, id}; activeCat = null; viewMode = 'catalog'; show('live'); }
+function openCustom(){ viewMode = 'custom'; show('live'); }
+
+/* ---------- Player ---------- */
+const player = $('#player'), video = $('#video'), msg = $('#msg');
+let hls = null, ctx = {list:[], i:0}, stallTimer = null, idleTimer = null;
+
+function stop(){
+  clearTimeout(stallTimer); curRetry = null;
+  if (hls){ hls.destroy(); hls = null; }
+  video.removeAttribute('src'); video.load();
+}
+function fail(c, why){
+  clearTimeout(stallTimer);
+  dead.add(c.url); LS.set('p0ipo.dead', [...dead]);
+  msg.hidden = false;
+  msg.innerHTML = `<b>${esc(clean(c.name))} speelt niet af.</b><br>${esc(why)}<br><br>Druk → voor het volgende kanaal.`;
+}
+const HOSTED = /^https?:$/.test(location.protocol);
+const viaProxy = u => '/api/p?u=' + encodeURIComponent(u);
+let curRetry = null;
+
+function play(list, i){
+  ctx = {list, i: (i + list.length) % list.length};
+  const c = ctx.list[ctx.i];
+  player.classList.add('open'); wake();
+  $('#pName').innerHTML = `${esc(clean(c.name))}<span class="live">LIVE</span>`;
+  $('#pSub').textContent = [c.group, (c.name.match(/\((\d{3,4}[pi])\)/i)||[])[1]].filter(Boolean).join(', ') || 'Live';
+  $('#favBtn').classList.toggle('on', isFav(c.url));
+  $('#pauseBtn').textContent = 'Pauze';
+  const mustProxy = HOSTED && location.protocol === 'https:' && c.url.startsWith('http:');
+  start(c, mustProxy);
+}
+function start(c, proxied){
+  stop();
+  msg.hidden = false; msg.textContent = proxied ? 'Afstemmen via proxy…' : 'Afstemmen…';
+  const src = proxied ? viaProxy(c.url) : c.url;
+  const retry = curRetry = why => (HOSTED && !proxied) ? start(c, true) : fail(c, why);
+  stallTimer = setTimeout(() => retry('Geen beeld binnen 15 seconden. Waarschijnlijk offline of geo-blocked.'), 15000);
+  if (window.Hls && Hls.isSupported()){
+    hls = new Hls({maxBufferLength: 20});
+    hls.on(Hls.Events.ERROR, (_, d) => { if (d.fatal) retry(d.type === 'networkError' ? 'Netwerkfout: de stream is offline, geo-blocked of weigert verbinding.' : 'De stream heeft een formaat dat de browser niet kan afspelen.'); });
+    hls.loadSource(src); hls.attachMedia(video);
+  } else {
+    video.src = src;
+  }
+  video.play().catch(() => {});
+}
+video.addEventListener('playing', () => {
+  const c = ctx.list[ctx.i]; if (!c) return;
+  clearTimeout(stallTimer); msg.hidden = true;
+  if (dead.delete(c.url)) LS.set('p0ipo.dead', [...dead]);
+  recent = [c, ...recent.filter(r => r.url !== c.url)].slice(0, 20);
+  LS.set('p0ipo.recent', recent);
+});
+video.addEventListener('error', () => { if (!hls && curRetry) curRetry('Deze browser kan de stream niet openen.'); });
+
+function closePlayer(){
+  stop(); player.classList.remove('open');
+  if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+  show(document.querySelector('#hearth').hidden ? 'live' : 'hearth');
+}
+function toggleFav(c){
+  favs = isFav(c.url) ? favs.filter(f => f.url !== c.url) : [...favs, c];
+  LS.set('p0ipo.favs', favs);
+}
+function wake(){
+  player.classList.remove('idle'); clearTimeout(idleTimer);
+  idleTimer = setTimeout(() => player.classList.add('idle'), 3000);
+}
+player.addEventListener('mousemove', wake);
+$('#closeBtn').onclick = closePlayer;
+$('#prevBtn').onclick = () => play(ctx.list, ctx.i - 1);
+$('#nextBtn').onclick = () => play(ctx.list, ctx.i + 1);
+$('#pauseBtn').onclick = () => { if (video.paused){ video.play(); $('#pauseBtn').textContent = 'Pauze'; } else { video.pause(); $('#pauseBtn').textContent = 'Verder'; } };
+$('#favBtn').onclick = () => { const c = ctx.list[ctx.i]; toggleFav(c); $('#favBtn').classList.toggle('on', isFav(c.url)); };
+$('#fsBtn').onclick = () => {
+  if (document.fullscreenElement) return document.exitFullscreen();
+  if (player.requestFullscreen) player.requestFullscreen().catch(()=>{});
+  else if (video.webkitEnterFullscreen) video.webkitEnterFullscreen();
+};
+
+/* touch: tik = HUD tonen/verbergen, vegen = zappen */
+let tx = null, ty = null;
+player.addEventListener('touchstart', e => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, {passive:true});
+player.addEventListener('touchend', e => {
+  if (tx === null) return;
+  const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty; tx = null;
+  if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5){ play(ctx.list, ctx.i + (dx < 0 ? 1 : -1)); return; }
+  if (e.target === video && Math.abs(dx) < 10 && Math.abs(dy) < 10){
+    if (player.classList.contains('idle')) wake(); else { clearTimeout(idleTimer); player.classList.add('idle'); }
+  }
+});
+
+/* ---------- Events ---------- */
+document.addEventListener('click', e => {
+  const cardEl = e.target.closest('.card');
+  if (cardEl){ play(lists[cardEl.dataset.k], +cardEl.dataset.i); return; }
+  if (e.target.closest('#retryCatalog')){ loadCatalog(); return; }
+  const catEl = e.target.closest('[data-cat]');
+  if (catEl){ openCat(catEl.dataset.cat); return; }
+  const quickEl = e.target.closest('[data-quick]');
+  if (quickEl){ const [type, id] = quickEl.dataset.quick.split(':'); openQuick(type, id); return; }
+  if (e.target.closest('[data-clear-quick]')){ activeQuick = null; renderLive(); return; }
+  if (e.target.closest('[data-custom]')){ openCustom(); return; }
+  const modeEl = e.target.closest('[data-mode]');
+  if (modeEl){ viewMode = modeEl.dataset.mode; renderLive(); return; }
+  const customSrcEl = e.target.closest('[data-custom-src]');
+  if (customSrcEl){ activeCustomId = customSrcEl.dataset.customSrc; renderLive(); return; }
+  const g = e.target.closest('[data-group]');
+  if (g){ activeGroup = g.dataset.group || null; renderLive(); return; }
+  const v = e.target.closest('nav [data-view]');
+  if (v) show(v.dataset.view);
+});
+document.addEventListener('contextmenu', e => {
+  const el = e.target.closest('.card'); if (!el) return;
+  e.preventDefault();
+  favFromCard(el);
+});
+$('#goPais').onclick = () => openCat('mipais');
+$('#resume').onclick = () => recent[0] ? play(recent, 0) : openCat('mipais');
+$('#hideDead').onchange = renderLive;
+$('#more').onclick = appendPage;
+if ('IntersectionObserver' in window) new IntersectionObserver(es => { if (es[0].isIntersecting && !$('#more').hidden) appendPage(); }, {rootMargin:'600px'}).observe($('#more'));
+let qTimer;
+$('#q').addEventListener('input', () => {
+  clearTimeout(qTimer);
+  qTimer = setTimeout(() => { if ($('#live').hidden) show('live'); else renderLive(); }, 200);
+});
+$('#addForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const url = $('#addUrl').value.trim();
+  let label; try { label = new URL(url).hostname; } catch { return; }
+  const src = {id: 'c' + Date.now(), label, url};
+  customs.push(src); LS.set('p0ipo.customs', customs);
+  $('#addUrl').value = '';
+  viewMode = 'custom'; activeCustomId = src.id;
+  show('live');
+});
+
+const ARROWS = ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'];
+document.addEventListener('keydown', e => {
+  if (player.classList.contains('open')){
+    wake();
+    const c = ctx.list[ctx.i];
+    if (e.key === 'Escape' || e.key === 'Backspace'){ e.preventDefault(); closePlayer(); }
+    else if (e.key === 'ArrowRight' || e.key === 'ArrowUp'){ e.preventDefault(); play(ctx.list, ctx.i + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown'){ e.preventDefault(); play(ctx.list, ctx.i - 1); }
+    else if (e.key === ' '){ e.preventDefault(); $('#pauseBtn').click(); }
+    else if (e.key.toLowerCase() === 'f'){ $('#fsBtn').click(); }
+    else if (e.key.toLowerCase() === 's' && c){ $('#favBtn').click(); }
+    return;
+  }
+  const el = document.activeElement;
+  if (e.key.toLowerCase() === 's' && el?.classList.contains('card')){ favFromCard(el); return; }
+  if (!ARROWS.includes(e.key)) return;
+  if (el?.tagName === 'INPUT' && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) return;
+  const items = [...document.querySelectorAll('.nav-target')].filter(n => n.offsetParent);
+  if (!items.includes(el)){ items[0]?.focus(); e.preventDefault(); return; }
+  const r = el.getBoundingClientRect(), cx = r.left + r.width/2, cy = r.top + r.height/2;
+  const horiz = e.key === 'ArrowLeft' || e.key === 'ArrowRight';
+  let best = null, bd = Infinity;
+  for (const n of items){
+    if (n === el) continue;
+    const b = n.getBoundingClientRect(), x = b.left + b.width/2 - cx, y = b.top + b.height/2 - cy;
+    const ok = e.key === 'ArrowRight' ? x > 4 : e.key === 'ArrowLeft' ? x < -4 : e.key === 'ArrowDown' ? y > 4 : y < -4;
+    if (!ok) continue;
+    const d = horiz ? Math.abs(x) + Math.abs(y) * 3 : Math.abs(y) + Math.abs(x) * 2;
+    if (d < bd){ bd = d; best = n; }
+  }
+  if (best){ e.preventDefault(); best.focus(); best.scrollIntoView({block:'nearest', inline:'nearest'}); }
+});
+
+function tick(){ $('#clock').textContent = new Date().toLocaleTimeString('nl-NL', {hour:'2-digit', minute:'2-digit'}); }
+tick(); setInterval(tick, 15000);
+if (HOSTED && 'serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+renderHearth();
+loadCatalog();
+</script>
+</body>
+</html>

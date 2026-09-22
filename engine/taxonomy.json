@@ -1,0 +1,24 @@
+{
+  "_uitleg": "P0ïPo-categorieën. Een kanaal mag in meerdere categorieën vallen. Regels: iptv-org-categorieën (cats), woorden in de naam (name, regex), landen (countries), talen (langs). 'require' = alle genoemde regels moeten kloppen.",
+  "categories": [
+    {"id": "mipais", "label": "Mi Pais", "emoji": "🌴", "any": [{"countries": ["aw", "cw", "bq"]}, {"langs": ["pap"]}]},
+    {"id": "anime", "label": "Anime", "emoji": "🍥", "any": [
+      {"name": "anime|animax|hidive|crunchyroll|toonami|otaku"},
+      {"require": [{"cats": ["animation"]}, {"countries": ["jp"]}]},
+      {"require": [{"cats": ["animation"]}, {"langs": ["jpn"]}]}
+    ]},
+    {"id": "football", "label": "Football", "emoji": "⚽", "any": [{"name": "football|soccer|f[uú]tbol|voetbal|eredivisie|laliga|la liga|bundesliga|premier league|serie a\\b|champions league|copa\\b|\\bgoal\\b"}]},
+    {"id": "sport", "label": "Sport", "emoji": "🏟️", "any": [{"cats": ["sports", "outdoor"]}, {"name": "sport|espn|golf|tennis|\\bnba\\b|\\bnfl\\b|\\bmlb\\b|\\bnhl\\b|racing|motor|fight|\\bufc\\b|\\bwwe\\b|boxing|cricket|rugby"}, {"ref": "football"}]},
+    {"id": "nieuws", "label": "Nieuws", "emoji": "📰", "any": [{"cats": ["news", "weather", "business"]}, {"name": "news|nieuws|noticias|notícias|journaal|nachrichten|actualit|\\bcnn\\b|bloomberg|euronews|al jazeera|\\bcnbc\\b|\\bnos\\b|weather"}]},
+    {"id": "films", "label": "Films", "emoji": "🎬", "any": [{"cats": ["movies"]}, {"name": "movie|film|cinema|\\bcine\\b|kino"}]},
+    {"id": "series", "label": "Series", "emoji": "📺", "any": [{"cats": ["series", "comedy", "classic"]}, {"name": "series|sitcom|comedy|novela|drama|\\bretro\\b|classic tv"}]},
+    {"id": "kids", "label": "Kids", "emoji": "🧸", "any": [{"cats": ["kids", "family", "animation"]}, {"name": "kids|junior|cartoon|nick|disney|baby|toon|kinder|infantil"}], "not": ["anime"]},
+    {"id": "muziek", "label": "Muziek", "emoji": "🎵", "any": [{"cats": ["music"]}, {"name": "music|muziek|musica|música|\\bmtv\\b|\\bhits\\b|\\bfm\\b|radio|reggae|salsa|tumba|dancehall"}]},
+    {"id": "docu", "label": "Documentaire", "emoji": "🌋", "any": [{"cats": ["documentary", "science", "education", "travel", "culture"]}, {"name": "docu|discovery|history|nature|nat geo|planet|science|wild"}]},
+    {"id": "lifestyle", "label": "Lifestyle", "emoji": "🍳", "any": [{"cats": ["lifestyle", "cooking", "auto", "relax"]}, {"name": "food|cook|chef|home|garden|fashion|travel"}]},
+    {"id": "religie", "label": "Religie", "emoji": "🕊️", "any": [{"cats": ["religious"]}, {"name": "church|gospel|\\bgod\\b|christ|islam|quran|bible|catholic|\\bdios\\b|iglesia|worship|prayer"}]},
+    {"id": "overheid", "label": "Overheid & publiek", "emoji": "🏛️", "any": [{"cats": ["legislative", "public"]}]},
+    {"id": "shop", "label": "Shopping", "emoji": "🛍️", "any": [{"cats": ["shop"]}, {"name": "shop|qvc|\\bhsn\\b"}]},
+    {"id": "algemeen", "label": "Algemeen", "emoji": "📡", "fallback": true}
+  ]
+}
