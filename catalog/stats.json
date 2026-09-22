@@ -1,0 +1,26 @@
+{
+  "generated": "2026-09-22T14:36:23.942Z",
+  "kanalen": 10966,
+  "getest": 10966,
+  "gezond": 10966,
+  "dood": 0,
+  "faaldeDezeRun": 4254,
+  "nieuw": 0,
+  "perCategorie": {
+    "mipais": 21,
+    "anime": 17,
+    "football": 7,
+    "sport": 498,
+    "nieuws": 1092,
+    "films": 776,
+    "series": 864,
+    "kids": 560,
+    "muziek": 994,
+    "docu": 747,
+    "lifestyle": 230,
+    "religie": 790,
+    "overheid": 220,
+    "shop": 81,
+    "algemeen": 4660
+  }
+}
