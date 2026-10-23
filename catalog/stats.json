@@ -1,10 +1,10 @@
 {
-  "generated": "2026-10-23T11:44:03.510Z",
+  "generated": "2026-10-23T17:12:13.244Z",
   "kanalen": 11302,
   "getest": 11302,
-  "gezond": 8202,
-  "dood": 3100,
-  "faaldeDezeRun": 3244,
+  "gezond": 8236,
+  "dood": 3066,
+  "faaldeDezeRun": 3272,
   "nieuw": 0,
   "perCategorie": {
     "mipais": 21,
