@@ -1,11 +1,11 @@
 {
-  "generated": "2026-11-05T19:59:26.445Z",
-  "kanalen": 11403,
-  "getest": 11403,
-  "gezond": 8378,
-  "dood": 3025,
-  "faaldeDezeRun": 3497,
-  "nieuw": 0,
+  "generated": "2026-11-06T06:52:58.710Z",
+  "kanalen": 11404,
+  "getest": 11404,
+  "gezond": 8498,
+  "dood": 2906,
+  "faaldeDezeRun": 3151,
+  "nieuw": 379,
   "perCategorie": {
     "mipais": 21,
     "anime": 16,
@@ -18,9 +18,9 @@
     "muziek": 1022,
     "docu": 801,
     "lifestyle": 277,
-    "religie": 824,
+    "religie": 826,
     "overheid": 221,
     "shop": 81,
-    "algemeen": 4792
+    "algemeen": 4791
   }
 }
