@@ -1,26 +1,26 @@
 {
-  "generated": "2026-11-12T19:58:35.587Z",
-  "kanalen": 11461,
-  "getest": 11461,
-  "gezond": 8396,
-  "dood": 3065,
-  "faaldeDezeRun": 3457,
-  "nieuw": 0,
+  "generated": "2026-11-13T06:50:43.529Z",
+  "kanalen": 11464,
+  "getest": 11464,
+  "gezond": 8440,
+  "dood": 3024,
+  "faaldeDezeRun": 3180,
+  "nieuw": 32,
   "perCategorie": {
     "mipais": 21,
     "anime": 16,
     "football": 7,
-    "sport": 589,
-    "nieuws": 1171,
+    "sport": 595,
+    "nieuws": 1174,
     "films": 802,
     "series": 853,
-    "kids": 601,
+    "kids": 603,
     "muziek": 1020,
-    "docu": 789,
+    "docu": 788,
     "lifestyle": 278,
     "religie": 833,
     "overheid": 220,
     "shop": 81,
-    "algemeen": 4787
+    "algemeen": 4780
   }
 }
