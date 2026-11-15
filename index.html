@@ -184,6 +184,7 @@ main{padding:0 clamp(1rem,4vw,3rem) 4rem}
 
 <script type="module">
 import { REPO, rawUrl } from './repo-config.mjs';
+import { maakMelder } from './meld-ouder.mjs';
 
 const BASE = 'https://iptv-org.github.io/iptv/';
 const CATALOG_CACHE_NAME = 'p0ipo-catalog';
@@ -553,6 +554,7 @@ function openCustom(){ viewMode = 'custom'; show('live'); }
 /* ---------- Player ---------- */
 const player = $('#player'), video = $('#video'), msg = $('#msg');
 let hls = null, ctx = {list:[], i:0}, stallTimer = null, idleTimer = null;
+const melder = maakMelder();
 
 function stop(){
   clearTimeout(stallTimer); curRetry = null;
@@ -577,6 +579,7 @@ function play(list, i){
   $('#pSub').textContent = [c.group, (c.name.match(/\((\d{3,4}[pi])\)/i)||[])[1]].filter(Boolean).join(', ') || 'Live';
   $('#favBtn').classList.toggle('on', isFav(c.url));
   $('#pauseBtn').textContent = 'Pauze';
+  melder.kies(clean(c.name), c.group);
   const mustProxy = HOSTED && location.protocol === 'https:' && c.url.startsWith('http:');
   start(c, mustProxy);
 }
@@ -601,11 +604,13 @@ video.addEventListener('playing', () => {
   if (dead.delete(c.url)) LS.set('p0ipo.dead', [...dead]);
   recent = [c, ...recent.filter(r => r.url !== c.url)].slice(0, 20);
   LS.set('p0ipo.recent', recent);
+  melder.speelt(true);
 });
+video.addEventListener('pause', () => melder.speelt(false));
 video.addEventListener('error', () => { if (!hls && curRetry) curRetry('Deze browser kan de stream niet openen.'); });
 
 function closePlayer(){
-  stop(); player.classList.remove('open');
+  stop(); melder.stop(); player.classList.remove('open');
   if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
   show(document.querySelector('#hearth').hidden ? 'live' : 'hearth');
 }
