@@ -563,6 +563,7 @@ function stop(){
 }
 function fail(c, why){
   clearTimeout(stallTimer);
+  melder.stop();
   dead.add(c.url); LS.set('p0ipo.dead', [...dead]);
   msg.hidden = false;
   msg.innerHTML = `<b>${esc(clean(c.name))} speelt niet af.</b><br>${esc(why)}<br><br>Druk → voor het volgende kanaal.`;

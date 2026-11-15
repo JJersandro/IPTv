@@ -39,3 +39,15 @@ test('speelt() zonder gekozen zender doet niets', () => {
   maakMelder(win).speelt(true);
   assert.equal(berichten.length, 0);
 });
+
+test('stop() na falende stream: zender leeg, en late pause-events zeggen niets meer', () => {
+  const { win, berichten } = nep();
+  const m = maakMelder(win);
+  m.kies('Kapot TV', 'News'); m.speelt(true);
+  m.stop(); // wat fail() doet
+  m.speelt(false); // late pause-event
+  assert.deepEqual(berichten.map(x => x[0]), [
+    { type: 'p0ipo-tv', zender: 'Kapot TV', speelt: true, groep: 'News' },
+    { type: 'p0ipo-tv', zender: '' },
+  ]);
+});
