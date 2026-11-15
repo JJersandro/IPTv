@@ -1,5 +1,5 @@
-const CACHE = 'p0ipo-tv-v2';
-const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png'];
+const CACHE = 'p0ipo-tv-v3';
+const SHELL = ['./', './index.html', './meld-ouder.mjs', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL))); self.skipWaiting(); });
 self.addEventListener('activate', (e) => e.waitUntil(
   caches.keys()
