@@ -9,21 +9,11 @@
 //   3. Sec-Fetch-Site: same-origin — dekt top-level aanroepen vanuit de app
 //      zelf (bijv. een custom M3U-stream), maar is vervalsbaar buiten de
 //      browser: een gewone request-header, geen cryptografisch bewijs.
-//
-// Runtime: Node (niet Edge). Edge weigert streams op een IP-adres of een
-// eigen poort (http://88.212.7.14/..., :8000), ruim 3000 zenders. Node mag dat.
-// Daarom ook een DNS-check: een hostnaam die naar een intern adres wijst, mag niet.
-import { lookup } from 'node:dns/promises';
+export const config = { runtime: 'edge' };
+
 import { rawUrl } from '../repo-config.mjs';
 
 const BLOCKED_HOST = /^(localhost|127\.|10\.|0\.|192\.168\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.|\[|.*\.local$|.*\.internal$)/i;
-const PRIVATE_IP = /^(127\.|10\.|0\.|192\.168\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.|100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.|::1$|::$|f[cd]|fe[89ab]|::ffff:(127\.|10\.|192\.168\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.))/i;
-export async function wijstNaarIntern(hostname){
-  try {
-    const adressen = await lookup(hostname, { all: true });
-    return adressen.some(a => PRIVATE_IP.test(a.address));
-  } catch { return false; } // niet op te zoeken: de fetch faalt straks vanzelf
-}
 const MEDIA_TYPE = /mpegurl|mp2t|video\/|audio\/|octet-stream|binary|dash\+xml|text\/plain|mp4/i;
 const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'range', 'access-control-expose-headers': 'content-length, content-range' };
 const txt = (status, msg) => new Response(msg, { status, headers: { ...cors, 'content-type': 'text/plain; charset=utf-8' } });
@@ -123,17 +113,12 @@ async function rewrite(body, base, origin){
   return out.join('\n');
 }
 
-// Node-runtime met Web-handlers (Request → Response).
-export function OPTIONS(){ return new Response(null, { headers: cors }); }
-export function GET(req){ return handler(req); }
-
-export async function handler(req) {
-  if (req.method === 'OPTIONS') return OPTIONS();
+export default async function handler(req) {
+  if (req.method === 'OPTIONS') return new Response(null, { headers: cors });
   const self = new URL(req.url);
   let target;
   try { target = new URL(self.searchParams.get('u')); } catch { return txt(400, 'Ongeldige stream-url'); }
   if (!/^https?:$/.test(target.protocol) || BLOCKED_HOST.test(target.hostname)) return txt(403, 'Deze bron is niet toegestaan');
-  if (await wijstNaarIntern(target.hostname)) return txt(403, 'Deze bron is niet toegestaan');
 
   const sig = self.searchParams.get('sig');
   const exp = self.searchParams.get('exp');
