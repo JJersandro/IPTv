@@ -119,7 +119,7 @@ const compact = list.map(c => {
 await writeFile(new URL('channels.json', OUT), JSON.stringify({ generated: now, categories: tax.map(({ id, label, emoji }) => ({ id, label, emoji })), channels: compact }));
 await writeFile(new URL('health.json', OUT), JSON.stringify({ generated: now, channels: Object.fromEntries(list.map(c => [c.id, [c.first, c.fails, c.err || null]])) }));
 await writeFile(new URL('stats.json', OUT), JSON.stringify({ generated: now, ...stats }, null, 2));
-// hosts.json: allowlist voor api/p.js — unieke hostnames van alle catalogus-streams.
+// hosts.json: allowlist voor api/p.mjs — unieke hostnames van alle catalogus-streams.
 const hosts = [...new Set(list.map(c => { try { return new URL(c.url).hostname; } catch { return null; } }).filter(Boolean))].sort();
 await writeFile(new URL('hosts.json', OUT), JSON.stringify({ generated: now, hosts }));
 console.log(JSON.stringify(stats, null, 2));
