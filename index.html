@@ -185,6 +185,7 @@ main{padding:0 clamp(1rem,4vw,3rem) 4rem}
 <script type="module">
 import { REPO, rawUrl } from './repo-config.mjs';
 import { maakMelder } from './meld-ouder.mjs';
+import { maakBediening } from './bediening.mjs';
 
 const BASE = 'https://iptv-org.github.io/iptv/';
 const CATALOG_CACHE_NAME = 'p0ipo-catalog';
@@ -606,8 +607,12 @@ video.addEventListener('playing', () => {
   recent = [c, ...recent.filter(r => r.url !== c.url)].slice(0, 20);
   LS.set('p0ipo.recent', recent);
   melder.speelt(true);
+  $('#pauseBtn').textContent = 'Pauze';
 });
-video.addEventListener('pause', () => melder.speelt(false));
+// Knop volgt het beeld, ook als de Wereldkaart de TV pauzeert.
+video.addEventListener('pause', () => { melder.speelt(false); $('#pauseBtn').textContent = 'Verder'; });
+// Wereldkaart → TV: pauze, zacht, normaal (zie bediening.mjs).
+window.addEventListener('message', maakBediening(window, video));
 video.addEventListener('error', () => { if (!hls && curRetry) curRetry('Deze browser kan de stream niet openen.'); });
 
 function closePlayer(){
