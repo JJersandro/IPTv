@@ -7,8 +7,8 @@ Live: https://p0ipo-tv.vercel.app
 | Pad | Wat |
 |---|---|
 | `index.html` | De app (Hearth, Live, speler) — laadt de catalogus in 4 lagen: raw.githubusercontent.com (main), `/catalog/channels.json`, een lokale Cache API-kopie, en als allerlaatste redmiddel alleen de Mi Pais-lijsten |
-| `repo-config.mjs` | Eén plek voor de repo-identiteit (owner/naam/branch), gebruikt door `index.html` en `api/p.js` |
-| `api/p.js` | Stream-proxy: lost CORS en http-op-https op, en autoriseert verzoeken via een hosts-allowlist, HMAC-handtekeningen op zelf-herschreven URLs, of `Sec-Fetch-Site: same-origin` |
+| `repo-config.mjs` | Eén plek voor de repo-identiteit (owner/naam/branch), gebruikt door `index.html` en `api/p.mjs` |
+| `api/p.mjs` | Stream-proxy (Node-runtime: Edge weigert IP-adressen en eigen poorten): lost CORS en http-op-https op, en autoriseert verzoeken via een hosts-allowlist, HMAC-handtekeningen op zelf-herschreven URLs, of `Sec-Fetch-Site: same-origin` |
 | `engine/build-catalog.mjs` | Catalogus-motor: ophalen, indelen, streams testen |
 | `engine/categorize.mjs` | Gedeelde indelingslogica (taxonomie-matching) — gebruikt door zowel de motor (Node) als `index.html` (browser, alleen als allerlaatste redmiddel) |
 | `engine/taxonomy.json` | Jouw categorieën (Mi Pais, Anime, Football, ...) en hun regels |
@@ -29,7 +29,7 @@ wat daadwerkelijk verborgen wordt.
 |---|---|---|
 | `PROXY_SECRET` | Aanbevolen | Vercel → Project → Settings → Environment Variables |
 
-`PROXY_SECRET` ondertekent (HMAC-SHA256) de URLs die `api/p.js` zelf in
+`PROXY_SECRET` ondertekent (HMAC-SHA256) de URLs die `api/p.mjs` zelf in
 playlists herschrijft (segmenten/sub-playlists), zodat die altijd via de
 proxy mogen lopen zonder dat hun host in `catalog/hosts.json` hoeft te
 staan. Ontbreekt de variabele, dan schakelt dat autorisatiepad zichzelf
@@ -41,10 +41,10 @@ functioneren, alleen iets minder streng voor niet-catalogusstreams.
 vervalsbaar door een client buiten de browser (curl, een script) — dat pad
 is een goedkope heuristiek tegen misbruik vanuit een browser, geen
 cryptografische garantie. De blokkade van private/loopback-adressen in
-`api/p.js` is de échte grens en geldt voor elk verzoek, via elk pad.
+`api/p.mjs` is de échte grens en geldt voor elk verzoek, via elk pad.
 
 **Aanbevolen**: stel in Vercel een bandbreedte-alert / spend limit in
-(Project → Settings → Usage of Billing) — `api/p.js` proxyt videoverkeer,
+(Project → Settings → Usage of Billing) — `api/p.mjs` proxyt videoverkeer,
 dus dit is een goedkope, zinnige kostenbewaking.
 
 ## Eenmalig instellen
